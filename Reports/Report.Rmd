@@ -18,6 +18,9 @@ library(readr)
 setwd("C:/Week6/Meier_Project_01")
 data <- read_csv("DataRaw/lead-iq-01.csv")
 
+# Replace IQ=999 with 99, per investigator a typo
+data$IQ[data$IQ == 999] <- 99
+
 # Save data in processed
 save(data, file = file.path("DataProcessed", "data.RData"))  # Saves as .RData file
 ```
