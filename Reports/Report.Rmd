@@ -1,0 +1,66 @@
+---
+title: "Descriptive Report of Lead & IQ Data"
+output:
+  html_document: default
+  pdf_document: default
+date: "2024-10-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(readr)
+
+# Read in data
+setwd("C:/Week6/Meier_Project_01")
+data <- read_csv("DataRaw/lead-iq-01.csv")
+
+# Save data in processed
+save(data, file = file.path("DataProcessed", "data.RData"))  # Saves as .RData file
+```
+
+## Graph showing IQ levels by location status
+Histogram displays distribution of IQ by distance from the smelter.
+```{r histogram, echo=TRUE}
+ggplot(data, aes(x = IQ, fill = Smelter)) + 
+    geom_histogram(position = "identity", alpha = 0.5, bins = 10, color = "black", na.rm = TRUE) + 
+    labs(title = "Histogram of IQ Levels by Smelter Status", 
+         x = "IQ Levels", 
+         y = "Count") + 
+    theme_minimal()
+```
+
+## Summary table of IQ by Smelter distance
+```{r summary_table, echo=FALSE}
+# Create a summary table calculating average IQ by Smelter status
+
+summary_table <- data %>%
+    group_by(Smelter) %>%
+    summarise(
+        Count = n(),
+        Average_IQ = mean(IQ, na.rm = TRUE),
+        Min_IQ = min(IQ, na.rm = TRUE),
+        Max_IQ = max(IQ, na.rm = TRUE)
+    ) %>%
+    arrange(Smelter)  # Optional: arrange by Smelter status
+
+# Format the table using kable
+kable(summary_table, 
+      caption = "Summary Table of Average IQ by Smelter Location",
+      format = "html",   # Change to "latex" for PDF output
+      digits = 2,        # Number of decimal places
+      col.names = c("Smelter Location", "Count", "Average IQ", "Min IQ", "Max IQ")) %>%  # Custom column names
+  
+  kable_styling(full_width = FALSE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust column 1 width (Smelter Status)
+  column_spec(2, width = "2cm") %>%  # Adjust column 2 width (Count)
+  column_spec(3, width = "3cm") %>%  # Adjust column 3 width (Average IQ)
+  column_spec(4, width = "2cm") %>%  # Adjust column 4 width (Min IQ)
+  column_spec(5, width = "2cm")      # Adjust column 5 width (Max IQ)
+
+```
+## Discussion
+Table summarizes the count, average, and range of IQ levels for people far and near to the smelter.The average IQ for individuals near the smelter is `r round(summary_table$Average_IQ[summary_table$Smelter == "Near"], 2)`, while for those living farther away, the average IQ is `r round(summary_table$Average_IQ[summary_table$Smelter == "Far"], 2)`.
